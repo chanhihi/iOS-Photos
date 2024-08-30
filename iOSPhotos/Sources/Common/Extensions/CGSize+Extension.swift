@@ -4,12 +4,14 @@
 //
 //  Created by Chan on 8/28/24.
 //
+//  - MARK: SizeManager에서 동적으로 관리.
+//
 
 import UIKit
 
 extension CGSize {
-    static let yearSize = CGSize(width: 200, height: 200)
-    static let monthSize = CGSize(width: 150, height: 150)
-    static let daySize = CGSize(width: 100, height: 100)
-    static let allSize = CGSize(width: 50, height: 50)
+    static var yearSize: CGSize = .zero
+    static var monthSize: CGSize = .zero
+    static var daySize: CGSize = .zero
+    static var allSize: CGSize = .zero
 }

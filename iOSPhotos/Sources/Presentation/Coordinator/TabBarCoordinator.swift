@@ -7,42 +7,46 @@
 
 import UIKit
 
-class TabBarCoordinator: Coordinator {
-    var navigationController: UINavigationController?
+final class TabBarCoordinator: TabBarCoordinatorProtocol {
+    var finishDelegate: CoordinatorFinishDelegate?
+    var navigationController: UINavigationController
     var childCoordinators = [Coordinator]()
     var tabBarController: MainTabBarController
+    private let coordinatorFactory: CoordinatorFactory
+    var type: CoordinatorType = .tabbar
     
-    init(navigationController: UINavigationController?) {
+    init(navigationController: UINavigationController, coordinatorFactory: CoordinatorFactory = CoordinatorFactory()) {
         self.navigationController = navigationController
         self.tabBarController = MainTabBarController()
+        self.coordinatorFactory = coordinatorFactory
     }
     
     func start() {
         let tabs = TabBarItemType.allCases.map { itemType -> UIViewController in
-            let navigationController = UINavigationController()
+            let navigationController = coordinatorFactory.createNavigationController(for: itemType)
             navigationController.tabBarItem = UITabBarItem(title: itemType.title,
                                                            image: UIImage(systemName: itemType.iconName),
                                                            selectedImage: UIImage(systemName: itemType.iconName + ".fill"))
             
-            let coordinator = createCoordinator(for: itemType, using: navigationController)
+            let coordinator = coordinatorFactory.createCoordinator(for: itemType, using: navigationController)
             coordinator.start()
+            
+            childCoordinators.append(coordinator)
+            
             return navigationController
         }
         
         tabBarController.viewControllers = tabs
         tabBarController.selectedIndex = AppStateManager.shared.loadLastTabIndex()
+        
+        navigationController.setViewControllers([tabBarController], animated: false)
     }
-    
-    private func createCoordinator(for type: TabBarItemType, using navigationController: UINavigationController) -> Coordinator {
-        switch type {
-        case .storage:
-            return StorageCoordinator(navigationController: navigationController)
-        case .foryou:
-            return ForYouCoordinator(navigationController: navigationController)
-        case .album:
-            return AlbumCoordinator(navigationController: navigationController)
-        case .search:
-            return SearchCoordinator(navigationController: navigationController)
-        }
+}
+
+extension TabBarCoordinator: CoordinatorFinishDelegate {
+    func coordinatorDidFinish(childCoordinator: Coordinator) {
+        self.childCoordinators = self.childCoordinators
+            .filter({ $0.type != childCoordinator.type })
+        childCoordinator.navigationController.popToRootViewController(animated: true)
     }
 }

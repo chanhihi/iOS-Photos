@@ -28,7 +28,7 @@ class SegmentedControl: UISegmentedControl {
     
     private func setupSegmentedControl() {
         let savedIndex = AppStateManager.shared.loadLastStorageSegmentedIndex()
-        self.selectedSegmentIndex = (0...3).contains(savedIndex) ? savedIndex : 3
+        self.selectedSegmentIndex = (SegmentedModel.SortType.year.rawValue...SegmentedModel.SortType.all.rawValue).contains(savedIndex) ? savedIndex : 3
     }
     
     @objc func segmentChanged(_ sender: UISegmentedControl) {

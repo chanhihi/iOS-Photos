@@ -13,7 +13,7 @@ enum TabBarItemType: Int, CaseIterable {
     var title: String {
         switch self {
         case .storage: return NSLocalizedString("보관함", comment: "Tab title for Storage")
-        case .foryou: return NSLocalizedString("For You", comment: "Tab title for For You")
+        case .foryou: return NSLocalizedString("사진 관리", comment: "Tab title for Import")
         case .album: return NSLocalizedString("앨범", comment: "Tab title for Albums")
         case .search: return NSLocalizedString("검색", comment: "Tab title for Search")
         }
@@ -27,4 +27,5 @@ enum TabBarItemType: Int, CaseIterable {
         case .search: return "magnifyingglass"
         }
     }
+    
 }

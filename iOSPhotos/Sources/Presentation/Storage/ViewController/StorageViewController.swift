@@ -10,7 +10,7 @@ import Combine
 
 final class StorageViewController: UIViewController {
     
-    private var viewModel = StorageViewModel()
+    var viewModel: StorageViewModel!
     private var segmentedControl: SegmentedControl!
     private var storageCollectionView: StorageCollectionView!
     private var cancellables: Set<AnyCancellable> = []
@@ -25,8 +25,12 @@ final class StorageViewController: UIViewController {
         setupPhotosBinding()
     }
     
+    private func setupUI() {
+        view.backgroundColor = .systemBackground
+    }
+    
     private func setupCollectionView() {
-        storageCollectionView = StorageCollectionView()
+        storageCollectionView = StorageCollectionView(viewModel: self.viewModel)
         view.addSubview(storageCollectionView)
     }
     
@@ -37,10 +41,10 @@ final class StorageViewController: UIViewController {
     }
     
     private func setupPhotosBinding() {
-        viewModel.$photos
+        viewModel.$mediaItems
             .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] photos in
-                self?.storageCollectionView.setPhotos(photos)
+            .sink(receiveValue: { [weak self] mediaItems in
+                self?.storageCollectionView.setMediaItems(mediaItems)
             })
             .store(in: &cancellables)
     }
@@ -54,10 +58,6 @@ final class StorageViewController: UIViewController {
             .store(in: &cancellables)
     }
     
-    private func setupUI() {
-        view.backgroundColor = .systemBackground
-    }
-    
     private func setupLayout() {
         let insets = UIEdgeInsets(top: 10, left: 10, bottom: -10, right: -10)
         let betweenDistance: CGFloat = 20
@@ -66,9 +66,9 @@ final class StorageViewController: UIViewController {
         segmentedControl.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            storageCollectionView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0),
-            storageCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: insets.left),
-            storageCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: insets.right),
+            storageCollectionView.topAnchor.constraint(equalTo: view.topAnchor),
+            storageCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            storageCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
             segmentedControl.topAnchor.constraint(equalTo: storageCollectionView.bottomAnchor, constant: betweenDistance),
             segmentedControl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: insets.left),

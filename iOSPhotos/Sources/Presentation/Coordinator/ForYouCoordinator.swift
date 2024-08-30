@@ -7,16 +7,28 @@
 
 import UIKit
 
-class ForYouCoordinator: Coordinator {
-    var navigationController: UINavigationController?
+final class ForYouCoordinator: ForYouCoordinatorProtocol {
+    var finishDelegate: CoordinatorFinishDelegate?
+    var forYouViewController: ForYouViewController
+    var navigationController: UINavigationController
     var childCoordinators = [Coordinator]()
-
-    init(navigationController: UINavigationController?) {
+    var type: CoordinatorType = .foryou
+    
+    init(navigationController: UINavigationController) {
         self.navigationController = navigationController
+        self.forYouViewController = ForYouViewController()
     }
 
     func start() {
-        let forYouViewController = ForYouViewController()
-        navigationController?.viewControllers = [forYouViewController]
+        self.forYouViewController.viewModel = ForYouViewModel(self)
+        navigationController.viewControllers = [forYouViewController]
+    }
+}
+
+extension ForYouCoordinator: CoordinatorFinishDelegate {
+    func coordinatorDidFinish(childCoordinator: Coordinator) {
+        self.childCoordinators = self.childCoordinators
+            .filter({ $0.type != childCoordinator.type })
+        childCoordinator.navigationController.popToRootViewController(animated: true)
     }
 }
