@@ -25,6 +25,10 @@ final class StorageViewController: UIViewController {
         setupPhotosBinding()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        navigationController?.isNavigationBarHidden = true
+    }
+    
     private func setupUI() {
         view.backgroundColor = .systemBackground
     }
