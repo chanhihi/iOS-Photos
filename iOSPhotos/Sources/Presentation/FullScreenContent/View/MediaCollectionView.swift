@@ -35,7 +35,6 @@ final class MediaCollectionView: UICollectionView, UICollectionViewDataSource, U
         }
     }
     
-    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return viewModel.mediaItems.count
     }

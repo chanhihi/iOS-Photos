@@ -18,11 +18,11 @@ final class FullScreenContentViewController: UIViewController {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
         
-        setupCollectionView()
         setupUI()
         setupBottomToolbar()
         setupLayout()
-        bindViewModel()
+        setupCollectionView()
+        setupContentIndexBinding()
     }
     
     required init?(coder: NSCoder) {
@@ -54,7 +54,7 @@ final class FullScreenContentViewController: UIViewController {
 
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = .black
+        appearance.backgroundColor = .systemGray2
         appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
         appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
 
@@ -64,7 +64,7 @@ final class FullScreenContentViewController: UIViewController {
         navigationController.navigationBar.prefersLargeTitles = false
         navigationController.navigationBar.tintColor = .white
         
-        navigationController.navigationBar.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 40)
+//        navigationController.navigationBar.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 40)
 
         let backButton = UIBarButtonItem(image: UIImage(systemName: "arrow.backward"), style: .plain, target: self, action: #selector(dismissViewController))
         navigationItem.leftBarButtonItem = backButton
@@ -120,8 +120,17 @@ final class FullScreenContentViewController: UIViewController {
         collectionView = MediaCollectionView(frame: .zero, collectionViewLayout: layout, viewModel: viewModel)
     }
     
-    private func bindViewModel() {
-        
+    private func setupContentIndexBinding() {
+        viewModel.$currentIndex
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] index in
+                self?.updateNavigationBarTitle(at: index)
+            }
+            .store(in: &viewModel.cancellables)
+    }
+    
+    private func updateNavigationBarTitle(at index: Int) {
+        navigationItem.title = "Item \(index + 1) / \(viewModel.mediaItems.count)"
     }
     
     @objc private func dismissViewController() {

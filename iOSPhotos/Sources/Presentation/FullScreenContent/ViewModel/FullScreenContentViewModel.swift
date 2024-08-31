@@ -6,12 +6,14 @@
 //
 
 import UIKit
-import AVKit
+import Combine
+
+//import AVKit
 
 final class FullScreenContentViewModel {
     var mediaItems: [MediaItem]
-    var currentIndex: Int
-    var updateCurrentIndex: (() -> Void)?
+    @Published var currentIndex: Int
+    var cancellables: Set<AnyCancellable> = []
     
     init(mediaItems: [MediaItem], startIndex: Int = 0) {
         self.mediaItems = mediaItems
@@ -32,7 +34,6 @@ final class FullScreenContentViewModel {
             UIApplication.shared.windows.first?.rootViewController?.dismiss(animated: true)
         } else {
             currentIndex = max(0, currentIndex - 1)
-            updateCurrentIndex?()
         }
     }
 }

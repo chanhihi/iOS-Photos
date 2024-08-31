@@ -8,7 +8,7 @@
 import UIKit
 import AVKit
 
-final class FullScreenContentCoordinator: Coordinator {
+final class FullScreenContentCoordinator: NSObject, Coordinator {
     weak var finishDelegate: CoordinatorFinishDelegate?
     var navigationController: UINavigationController
     var childCoordinators = [Coordinator]()
@@ -19,61 +19,35 @@ final class FullScreenContentCoordinator: Coordinator {
     private let startIndex: Int
     private let startImageView: UIImageView
     
-
     init(navigationController: UINavigationController, mediaItems: [MediaItem], startIndex: Int, startImageView: UIImageView) {
         self.navigationController = navigationController
         self.mediaItems = mediaItems
         self.startIndex = startIndex
         self.startImageView = startImageView
+        super.init()
+        self.navigationController.delegate = self
     }
     
     func start() {
         let viewModel = FullScreenContentViewModel(mediaItems: mediaItems, startIndex: startIndex)
-        fullScreenContentViewController = FullScreenContentViewController(viewModel: viewModel)
-        
-        guard let fullScreenContentViewController = fullScreenContentViewController else { return }
+        let fullScreenContentViewController = FullScreenContentViewController(viewModel: viewModel)
         showFullScreenContent(from: startImageView, to: fullScreenContentViewController)
+        
     }
-
+    
     private func showFullScreenContent(from imageView: UIImageView, to viewController: UIViewController) {
-        guard let window = navigationController.view.window,
-              let startFrame = imageView.superview?.convert(imageView.frame, to: window) else {
-            return
+        self.navigationController.pushViewController(viewController, animated: true)
+    }
+    
+}
+
+extension FullScreenContentCoordinator: UINavigationControllerDelegate {
+    func navigationController(_ navigationController: UINavigationController, animationControllerFor operation: UINavigationController.Operation, from fromVC: UIViewController, to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        if operation == .push && toVC is FullScreenContentViewController {
+            let startFrame = startImageView.superview?.convert(startImageView.frame, to: nil) ?? CGRect.zero
+            return ImageTransitionAnimator(imageView: startImageView, startFrame: startFrame)
         }
-        
-        performTransitionAnimation(from: imageView, to: viewController, startFrame: startFrame, in: window)
-    }
-
-    private func performTransitionAnimation(from imageView: UIImageView, to viewController: UIViewController, startFrame: CGRect, in window: UIWindow) {
-        let animatedImageView = UIImageView(frame: startFrame)
-        animatedImageView.image = imageView.image
-        animatedImageView.contentMode = .scaleAspectFit
-        animatedImageView.clipsToBounds = true
-        window.addSubview(animatedImageView)
-        
-        imageView.isHidden = true
-        
-        let targetSize = calculateAspectFitSize(for: imageView.image?.size ?? .zero, in: window.bounds)
-        let endFrame = CGRect(x: (window.bounds.width - targetSize.width) / 2,
-                              y: (window.bounds.height - targetSize.height) / 2,
-                              width: targetSize.width,
-                              height: targetSize.height)
-        
-        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut, animations: {
-            animatedImageView.frame = endFrame
-        }, completion: { _ in
-            self.navigationController.pushViewController(viewController, animated: false)
-            animatedImageView.removeFromSuperview()
-            imageView.isHidden = false
-        })
-    }
-
-    private func calculateAspectFitSize(for imageSize: CGSize, in boundingRect: CGRect) -> CGSize {
-        let widthRatio = boundingRect.width / imageSize.width
-        let heightRatio = boundingRect.height / imageSize.height
-        let scale = min(widthRatio, heightRatio)
-        
-        return CGSize(width: imageSize.width * scale, height: imageSize.height * scale)
+        return nil
     }
 }
 
