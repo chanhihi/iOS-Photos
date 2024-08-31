@@ -6,14 +6,17 @@
 //
 
 import UIKit
+import Combine
 
-class SegmentedControl: UISegmentedControl {
-    weak var delegate: SegmentedControlDelegate?
+final class SegmentedControl: UISegmentedControl {
+    private var viewModel: StorageViewModel
     
-    init(items: [String]) {
+    init(items: [String], viewModel: StorageViewModel) {
+        self.viewModel = viewModel
         super.init(items: items)
         self.setupSegmentedControl()
         self.setupUI()
+        self.setupBinding()
         self.addTarget(self, action: #selector(segmentChanged(_:)), for: .valueChanged)
     }
     
@@ -26,12 +29,28 @@ class SegmentedControl: UISegmentedControl {
         self.selectedSegmentTintColor = .systemGray
     }
     
-    private func setupSegmentedControl() {
-        let savedIndex = AppStateManager.shared.loadLastStorageSegmentedIndex()
-        self.selectedSegmentIndex = (SegmentedModel.SortType.year.rawValue...SegmentedModel.SortType.all.rawValue).contains(savedIndex) ? savedIndex : 3
+    private func setupBinding() {
+        viewModel.$selectedSegmentIndex
+            .receive(on: RunLoop.main)
+            .sink { [weak self] index in
+                self?.updateSegmentIndex(index)
+            }
+            .store(in: &viewModel.cancellables)
     }
     
-    @objc func segmentChanged(_ sender: UISegmentedControl) {
-        delegate?.segmentedControlDidChange(self, selectedSegmentIndex: self.selectedSegmentIndex)
+    private func setupSegmentedControl() {
+        let savedIndex = AppStateManager.shared.loadLastStorageSegmentedIndex()
+        self.selectedSegmentIndex = (SegmentedModel.SortType.year.rawValue...SegmentedModel.SortType.all.rawValue).contains(savedIndex) ? savedIndex : SegmentedModel.SortType.all.rawValue
     }
+    
+    @objc private func segmentChanged(_ sender: UISegmentedControl) {
+        viewModel.updateSegmentIndex(to: self.selectedSegmentIndex)
+    }
+    
+    func updateSegmentIndex(_ index: Int) {
+        if self.selectedSegmentIndex != index {
+            self.selectedSegmentIndex = index
+        }
+    }
+    
 }

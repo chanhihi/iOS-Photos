@@ -11,7 +11,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     var tabBarCoordinator: Coordinator?
     var coverViewManager: CoverViewManager?
-    var navigationController: UINavigationController?
+    var navigationController: MainTabBarNavigationController?
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
@@ -20,8 +20,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         SizeManager.shared.updateSizes()
         coverViewManager = CoverViewManager(window: window)
         
-        navigationController = UINavigationController()
-        navigationController?.isNavigationBarHidden = true
+        navigationController = MainTabBarNavigationController()
         tabBarCoordinator = TabBarCoordinator(navigationController: navigationController!)
         tabBarCoordinator?.start()
         
@@ -31,6 +30,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.window = window
     }
     
+    #if !DEBUG /* 정보보호를 위한 LifeCycle */
     func sceneWillResignActive(_ scene: UIScene) {
         coverViewManager?.addCoverView()
     }
@@ -46,6 +46,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidBecomeActive(_ scene: UIScene) {
         coverViewManager?.removeCoverView()
     }
+    #endif
     
 }
 

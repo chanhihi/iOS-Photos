@@ -13,7 +13,6 @@ final class StorageViewController: UIViewController {
     var viewModel: StorageViewModel!
     private var segmentedControl: SegmentedControl!
     private var storageCollectionView: StorageCollectionView!
-    private var cancellables: Set<AnyCancellable> = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,8 +38,7 @@ final class StorageViewController: UIViewController {
     }
     
     private func setupSegmentedControl() {
-        segmentedControl = SegmentedControl(items: SegmentedModel().items)
-        segmentedControl.delegate = self
+        segmentedControl = SegmentedControl(items: SegmentedModel().items, viewModel: self.viewModel)
         view.addSubview(segmentedControl)
     }
     
@@ -50,7 +48,7 @@ final class StorageViewController: UIViewController {
             .sink(receiveValue: { [weak self] mediaItems in
                 self?.storageCollectionView.setMediaItems(mediaItems)
             })
-            .store(in: &cancellables)
+            .store(in: &viewModel.cancellables)
     }
     
     private func setupLayerBinding() {
@@ -58,8 +56,18 @@ final class StorageViewController: UIViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] layout in
                 self?.storageCollectionView.updateLayout(layout)
+                self?.storageCollectionView.updateVisibleCells()
             }
-            .store(in: &cancellables)
+            .store(in: &viewModel.cancellables)
+    }
+    
+    private func segmentIndexBinding() {
+        viewModel.$selectedSegmentIndex
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] index in
+                self?.segmentedControl.updateSegmentIndex(index)
+            }
+            .store(in: &viewModel.cancellables)
     }
     
     private func setupLayout() {
@@ -80,14 +88,5 @@ final class StorageViewController: UIViewController {
             segmentedControl.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: insets.bottom)
         ])
     }
-}
-
-extension StorageViewController: SegmentedControlDelegate {
-    func segmentedControlDidChange(_ segmentedControl: SegmentedControl,
-                                   selectedSegmentIndex: Int) {
-        guard let sortType = SegmentedModel.SortType(rawValue: selectedSegmentIndex)
-        else { return }
-        AppStateManager.shared.saveLastStorageSegmentedIndex(selectedSegmentIndex)
-        viewModel.updateLayout(for: sortType)
-    }
+    
 }

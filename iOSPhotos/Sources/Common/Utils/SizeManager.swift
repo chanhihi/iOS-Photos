@@ -22,8 +22,8 @@ final class SizeManager {
         let squareDay = screenWidth * 0.322
         let squareAll = screenWidth * 0.188
         
-        let year: WH = (width: screenWidth * 0.8, height: screenHeight * 0.33)
-        let month: WH = (width: screenWidth * 0.8, height: screenHeight * 0.25)
+        let year: WH = (width: screenWidth * 0.9, height: screenHeight * 0.33)
+        let month: WH = (width: screenWidth * 0.9, height: screenHeight * 0.25)
         let day: WH = (width: squareDay, height: squareDay)
         let all: WH = (width: squareAll, height: squareAll)
         

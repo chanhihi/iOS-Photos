@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 final class StorageCollectionView: UICollectionView, UICollectionViewDelegate, UICollectionViewDataSource {
     
@@ -17,7 +18,6 @@ final class StorageCollectionView: UICollectionView, UICollectionViewDelegate, U
         super.init(frame: .zero, collectionViewLayout: layout)
         setupProperty()
         setupUI()
-        setupBindings()
     }
     
     required init?(coder: NSCoder) {
@@ -34,12 +34,6 @@ final class StorageCollectionView: UICollectionView, UICollectionViewDelegate, U
         self.backgroundColor = .secondarySystemBackground
     }
     
-    private func setupBindings() {
-        viewModel?.onSegmentIndexChange = { [weak self] index in
-            self?.reloadData()
-        }
-    }
-    
     func updateLayout(_ layout: UICollectionViewFlowLayout) {
         UIView.animate(withDuration: 0.3) {
             self.setCollectionViewLayout(layout, animated: true)
@@ -49,6 +43,15 @@ final class StorageCollectionView: UICollectionView, UICollectionViewDelegate, U
     func setMediaItems(_ mediaItems: [MediaItem]) {
         self.mediaItems = mediaItems
         self.reloadData()
+    }
+    
+    func updateVisibleCells() {
+        for cell in self.visibleCells {
+            if let customCell = cell as? CustomCollectionViewCell, let indexPath = self.indexPath(for: customCell) {
+                let mediaItem = mediaItems[indexPath.row]
+                configureCell(customCell, with: mediaItem)
+            }
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -65,7 +68,7 @@ final class StorageCollectionView: UICollectionView, UICollectionViewDelegate, U
     }
     
     private func configureCell(_ cell: CustomCollectionViewCell, with mediaItem: MediaItem) {
-        cell.configure(with: mediaItem)
+        cell.configure(with: mediaItem, segmentIndex: SegmentedModel.SortType(rawValue: (viewModel?.selectedSegmentIndex)!) ?? SegmentedModel.SortType.all)
         let segmentedIndex = AppStateManager.shared.loadLastStorageSegmentedIndex()
         if (SegmentedModel.SortType.year.rawValue == segmentedIndex || SegmentedModel.SortType.month.rawValue == segmentedIndex) {
             cell.layer.cornerRadius = .collectionViewCornerRadiusYearMonth
@@ -74,18 +77,17 @@ final class StorageCollectionView: UICollectionView, UICollectionViewDelegate, U
             cell.layer.cornerRadius = .collectionViewCornerRadiusDayAll
         }
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
         let segmentedIndex = AppStateManager.shared.loadLastStorageSegmentedIndex()
         
         if segmentedIndex == SegmentedModel.SortType.day.rawValue || segmentedIndex == SegmentedModel.SortType.all.rawValue {
             let selectedPhoto = mediaItems[indexPath.row]
-            
-            guard let selectedCell = collectionView.cellForItem(at: indexPath) as? CustomCollectionViewCell else {
-                return
-            }
-            
+            guard let selectedCell = collectionView.cellForItem(at: indexPath) as? CustomCollectionViewCell else { return }
             viewModel?.didSelectPhoto(selectedPhoto, from: selectedCell.imageView)
+        } else {
+            self.viewModel?.updateSegmentIndex(to: segmentedIndex + 1)
         }
     }
 }
