@@ -41,6 +41,15 @@ final class MediaCollectionView: UICollectionView, UICollectionViewDataSource, U
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MediaItemCell.reuseIdentifier, for: indexPath) as! MediaItemCell
+        
+        cell.onDismissRequested = { [weak self] in
+            self?.viewModel.dismissViewController()
+        }
+        
+        cell.adjustAlpha = { [weak self] newAlpha in
+            self?.viewModel.adjustAlpha(newAlpha)
+        }
+        
         cell.configure(with: viewModel.mediaItems[indexPath.item])
         return cell
     }

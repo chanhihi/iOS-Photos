@@ -11,14 +11,16 @@ typealias WH = (width: CGFloat, height: CGFloat)
 
 final class SizeManager {
     static let shared = SizeManager()
+    var screenWidth: CGFloat!
+    var screenHeight: CGFloat!
     
     private init() {
         updateSizes()
     }
     
     func updateSizes() {
-        let screenWidth = UIScreen.main.bounds.width
-        let screenHeight = UIScreen.main.bounds.height
+        screenWidth = UIScreen.main.bounds.width
+        screenHeight = UIScreen.main.bounds.height
         let squareDay = screenWidth * 0.322
         let squareAll = screenWidth * 0.188
         

@@ -21,6 +21,11 @@ fclean: clean
 
 re: fclean gen
 
+init: 
+	tuist init
+
+start: init gen
+
 # ---- graph ---- #
 graph:
 	tuist graph --skip-external-dependencies

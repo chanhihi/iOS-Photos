@@ -15,4 +15,10 @@ extension UIFont {
         }
         return UIFont(descriptor: descriptor, size: 0)
     }
+    
+    static func semiboldPreferredFont(forTextStyle style: UIFont.TextStyle) -> UIFont {
+        let font = UIFont.preferredFont(forTextStyle: style)
+        let fontSize = font.pointSize
+        return UIFont.systemFont(ofSize: fontSize, weight: .semibold)
+    }
 }
