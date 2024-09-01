@@ -60,6 +60,11 @@ final class MediaCollectionView: UICollectionView, UICollectionViewDataSource, U
     
     func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         guard let visibleIndexPath = collectionView.indexPathsForVisibleItems.first else { return }
+        (cell as? MediaItemCell)?.stopPlayback()
         viewModel.currentIndex = visibleIndexPath.item
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        (cell as? MediaItemCell)?.startPlayback()
     }
 }

@@ -43,9 +43,6 @@ extension StorageCoordinator: CoordinatorFinishDelegate {
     func coordinatorDidFinish(childCoordinator: Coordinator) {
         self.childCoordinators = self.childCoordinators
             .filter({ $0 !== childCoordinator })
-//        childCoordinator.navigationController.popToRootViewController(animated: true)
-        print(">>>> Navi VC",childCoordinator.navigationController, "child coordi", childCoordinator)
-                childCoordinator.navigationController.dismiss(animated: true)
-
+        childCoordinator.navigationController.dismiss(animated: false)
     }
 }

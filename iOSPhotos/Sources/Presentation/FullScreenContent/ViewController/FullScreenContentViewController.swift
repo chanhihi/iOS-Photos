@@ -25,6 +25,7 @@ final class FullScreenContentViewController: UIViewController {
         setupContentIndexBinding()
         setupToolbar()
         setupLayout()
+        setupBackgroundBinding()
     }
     
     required init?(coder: NSCoder) {
@@ -52,38 +53,19 @@ final class FullScreenContentViewController: UIViewController {
     }
     
     private func setupUI() {
-        view.backgroundColor = .systemBackground
-        
-        // 모달 프레젠테이션을 위한 설정
-        modalPresentationStyle = .overFullScreen
+        self.view.backgroundColor = .systemBackground
     }
     
     private func setupBackgroundBinding() {
         viewModel.$viewControllerBackgroundColorAlpha
             .receive(on: RunLoop.main)
             .sink { [weak self] newAlpha in
-                self?.view.backgroundColor?.withAlphaComponent(newAlpha)
+                self?.view.backgroundColor = self?.view.backgroundColor?.withAlphaComponent(newAlpha)
             }
             .store(in: &viewModel.cancellables)
     }
     
     private func setupNavigationBar() {
-        guard let navigationController = navigationController else { return }
-        
-        navigationController.isNavigationBarHidden = false
-        navigationController.navigationBar.isTranslucent = false
-        navigationItem.largeTitleDisplayMode = .never
-        
-        let appearance = UINavigationBarAppearance()
-        appearance.backgroundColor = .systemGray5
-        appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
-        appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
-        
-        navigationController.navigationBar.standardAppearance = appearance
-        navigationController.navigationBar.compactAppearance = appearance
-        navigationController.navigationBar.scrollEdgeAppearance = appearance
-        navigationController.navigationBar.prefersLargeTitles = false
-        
         let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(dismissViewController))
         navigationItem.leftBarButtonItem = backButton
     }
@@ -202,7 +184,7 @@ final class FullScreenContentViewController: UIViewController {
     }
     
     @objc private func dismissViewController() {
-        navigationController?.popViewController(animated: true)
+        viewModel.dismissViewController()
     }
     
     @objc private func showImageMetaData() {

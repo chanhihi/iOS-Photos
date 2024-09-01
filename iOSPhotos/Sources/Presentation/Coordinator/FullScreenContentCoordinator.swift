@@ -25,7 +25,6 @@ final class FullScreenContentCoordinator: NSObject, Coordinator {
         self.startIndex = startIndex
         self.startImageView = startImageView
         super.init()
-        //        self.navigationController.delegate = self
     }
     
     func start() {
@@ -36,28 +35,19 @@ final class FullScreenContentCoordinator: NSObject, Coordinator {
     
     private func showFullScreenContent(from imageView: UIImageView, to viewController: UIViewController) {
         guard let window = navigationController.view.window,
-              let startFrame = imageView.superview?.convert(imageView.frame, to: window) else {
+              let startFrame = imageView.superview?.convert(imageView.frame, to: window),
+              let fullScreenContentViewController = fullScreenContentViewController else {
             return
         }
         
-        let transitioningDelegate = ImageTransitioningDelegate(imageView: imageView, startFrame: startFrame, finalFrame: fullScreenContentViewController?.finalImageViewFrame)
-        viewController.modalPresentationStyle = .overFullScreen
-        viewController.modalTransitionStyle = .crossDissolve
-        viewController.transitioningDelegate = transitioningDelegate
-        self.navigationController.present(viewController, animated: true)
+        let navController = FullScreenContentNavigationController(rootViewController: fullScreenContentViewController)
+        navController.modalPresentationStyle = .overFullScreen
+        navController.modalTransitionStyle = .crossDissolve
         
-        //        self.navigationController.pushViewController(viewController, animated: true)
+        let transitioningDelegate = ImageTransitioningDelegate(imageView: imageView, startFrame: startFrame, finalFrame: fullScreenContentViewController.finalImageViewFrame)
+        navController.transitioningDelegate = transitioningDelegate
+        
+        self.navigationController.present(navController, animated: true)
     }
     
 }
-
-//extension FullScreenContentCoordinator: UINavigationControllerDelegate {
-//    func navigationController(_ navigationController: UINavigationController, animationControllerFor operation: UINavigationController.Operation, from fromVC: UIViewController, to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-//        if operation == .push && toVC is FullScreenContentViewController {
-//            let startFrame = startImageView.superview?.convert(startImageView.frame, to: nil) ?? CGRect.zero
-//            return ImageTransitionAnimator(imageView: startImageView, startFrame: startFrame, finalFrame: fullScreenContentViewController?.finalImageViewFrame)
-//        }
-//        return nil
-//    }
-//}
-//
