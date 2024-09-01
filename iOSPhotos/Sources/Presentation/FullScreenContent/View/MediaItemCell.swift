@@ -90,7 +90,6 @@ final class MediaItemCell: UICollectionViewCell {
         if let layer = playerLayer {
             videoContainerView.layer.addSublayer(layer)
         }
-        player?.play()
     }
     
     func startPlayback() {
