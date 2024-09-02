@@ -15,8 +15,6 @@ final class CoordinatorFactory {
             return StorageCoordinator(navigationController: navigationController)
         case .foryou:
             return ForYouCoordinator(navigationController: navigationController)
-        case .search:
-            return SearchCoordinator(navigationController: navigationController)
         }
     }
     
@@ -26,8 +24,6 @@ final class CoordinatorFactory {
             return StorageNavigationController()
         case .foryou:
             return ForYouNavigationController()
-        case .search:
-            return SearchNavigationController()
         }
     }
 }

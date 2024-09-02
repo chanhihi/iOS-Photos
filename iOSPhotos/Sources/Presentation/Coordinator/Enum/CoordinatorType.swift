@@ -10,7 +10,5 @@ import Foundation
 enum CoordinatorType {
     case storage, fullScreenContent
     case foryou
-    case album
-    case search
     case tabbar
 }
