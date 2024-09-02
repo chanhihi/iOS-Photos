@@ -2,7 +2,6 @@ import ProjectDescription
 
 let settings = Settings.settings(
     base: [
-        "CONFIGURATION_BUILD_DIR": "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",
         "DEVELOPMENT_TEAM": "$(DEVELOPMENT_TEAM)",
     ],
     configurations: [
@@ -26,7 +25,9 @@ let project = Project(
             infoPlist: .file(path: "Configurations/info.plist"),
             sources: ["iOSPhotos/Sources/**"],
             resources: ["iOSPhotos/Resources/**"],
-            dependencies: []
+            dependencies: [
+                .sdk(name: "PhotosUI", type: .framework, status: .required)
+            ]
         ),
         .target(
             name: "iOSPhotosTests",

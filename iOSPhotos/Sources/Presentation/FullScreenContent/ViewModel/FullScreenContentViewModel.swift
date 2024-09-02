@@ -24,7 +24,7 @@ final class FullScreenContentViewModel {
     }
     
     func dismissViewController() {
-        coordinator?.finish() 
+        coordinator?.finish()
     }
     
     func adjustAlpha(_ newAlpha: CGFloat) {

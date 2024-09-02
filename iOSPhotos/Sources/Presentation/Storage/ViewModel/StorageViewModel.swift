@@ -7,8 +7,9 @@
 
 import UIKit
 import Combine
+import Photos
 
-final class StorageViewModel {
+final class StorageViewModel: NSObject {
     weak var coordinator: StorageCoordinator?
     private var loadMediaItemsUseCase: MediaItemsUseCaseProtocol
     
@@ -21,6 +22,9 @@ final class StorageViewModel {
     init(coordinator: StorageCoordinator, loadMediaItemsUseCase: MediaItemsUseCaseProtocol) {
         self.coordinator = coordinator
         self.loadMediaItemsUseCase = loadMediaItemsUseCase
+        super.init()
+        PHPhotoLibrary.shared().register(self)
+        
         setupInitialLayout()
         loadMediaItems()
     }
@@ -73,5 +77,11 @@ final class StorageViewModel {
         guard let sortType = SegmentedModel.SortType(rawValue: index) else { return }
         AppStateManager.shared.saveLastStorageSegmentedIndex(index)
         updateLayout(for: sortType)
+    }
+}
+
+extension StorageViewModel: PHPhotoLibraryChangeObserver {
+    func photoLibraryDidChange(_ changeInstance: PHChange) {
+        loadMediaItems()
     }
 }

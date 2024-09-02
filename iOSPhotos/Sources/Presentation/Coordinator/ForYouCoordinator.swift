@@ -20,9 +20,17 @@ final class ForYouCoordinator: ForYouCoordinatorProtocol {
     }
 
     func start() {
-        self.forYouViewController.viewModel = ForYouViewModel(self)
+        self.forYouViewController.viewModel = createForYouViewModel()
         navigationController.viewControllers = [forYouViewController]
     }
+    
+    private func createForYouViewModel() -> ForYouViewModel {
+        let mediaItemsLibraryDataSource = MediaItemsLibraryDataSource()
+        let repository = MediaItemsRepository(mediaItemsLibraryDataSource: mediaItemsLibraryDataSource)
+        let useCase = LoadPhotosUseCase(repository: repository)
+        return ForYouViewModel(coordinator: self, loadMediaItemsUseCase: useCase)
+    }
+    
 }
 
 extension ForYouCoordinator: CoordinatorFinishDelegate {
