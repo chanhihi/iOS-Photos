@@ -12,16 +12,17 @@ import Photos
 final class StorageViewModel: NSObject {
     weak var coordinator: StorageCoordinator?
     private var loadMediaItemsUseCase: MediaItemsUseCaseProtocol
+    let mediaItemsStore: MediaItemsStore
     
-    @Published var mediaItems: [MediaItem] = []
     @Published var currentLayout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
     @Published var selectedSegmentIndex: Int = SegmentedModel.SortType.all.rawValue
     
     var cancellables: Set<AnyCancellable> = []
     
-    init(coordinator: StorageCoordinator, loadMediaItemsUseCase: MediaItemsUseCaseProtocol) {
+    init(coordinator: StorageCoordinator, loadMediaItemsUseCase: MediaItemsUseCaseProtocol, mediaItemsStore: MediaItemsStore) {
         self.coordinator = coordinator
         self.loadMediaItemsUseCase = loadMediaItemsUseCase
+        self.mediaItemsStore = mediaItemsStore
         super.init()
         PHPhotoLibrary.shared().register(self)
         
@@ -39,15 +40,15 @@ final class StorageViewModel: NSObject {
     func loadMediaItems() {
         loadMediaItemsUseCase.execute { [weak self] loadedMediaItems in
             DispatchQueue.main.async {
-                self?.mediaItems = loadedMediaItems
+                self?.mediaItemsStore.mediaItems = loadedMediaItems
             }
         }
     }
-
+    
     func loadMoreMediaItems(completion: @escaping () -> Void) {
         loadMediaItemsUseCase.executeNextPage { [weak self] newMediaItems in
             DispatchQueue.main.async {
-                self?.mediaItems.append(contentsOf: newMediaItems)
+                self?.mediaItemsStore.addMediaItems(newMediaItems)
                 completion()
             }
         }
@@ -78,8 +79,8 @@ final class StorageViewModel: NSObject {
     }
     
     func didSelectPhoto(_ mediaItem: MediaItem, from imageView: UIImageView) {
-        guard let index = mediaItems.firstIndex(where: { $0 == mediaItem }) else { return }
-        coordinator?.showFullScreenContent(from: imageView, mediaItems: mediaItems, startIndex: index)
+        guard let index = mediaItemsStore.mediaItems.firstIndex(where: { $0 == mediaItem }) else { return }
+        coordinator?.showFullScreenContent(from: imageView, mediaItemsStore: mediaItemsStore, startIndex: index)
     }
     
     func updateSegmentIndex(to index: Int) {

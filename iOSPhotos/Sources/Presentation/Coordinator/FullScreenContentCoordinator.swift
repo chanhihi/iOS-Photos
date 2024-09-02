@@ -15,20 +15,20 @@ final class FullScreenContentCoordinator: NSObject, Coordinator {
     var type: CoordinatorType = .fullScreenContent
     private var fullScreenContentViewController: FullScreenContentViewController?
     
-    private let mediaItems: [MediaItem]
+    private let mediaItemsStore: MediaItemsStore
     private let startIndex: Int
     private let startImageView: UIImageView
     
-    init(navigationController: UINavigationController, mediaItems: [MediaItem], startIndex: Int, startImageView: UIImageView) {
+    init(navigationController: UINavigationController, mediaItemsStore: MediaItemsStore, startIndex: Int, startImageView: UIImageView) {
         self.navigationController = navigationController
-        self.mediaItems = mediaItems
+        self.mediaItemsStore = mediaItemsStore
         self.startIndex = startIndex
         self.startImageView = startImageView
         super.init()
     }
     
     func start() {
-        let viewModel = FullScreenContentViewModel(coordinator: self, mediaItems: mediaItems, startIndex: startIndex)
+        let viewModel = FullScreenContentViewModel(coordinator: self, mediaItemsStore: mediaItemsStore, startIndex: startIndex)
         fullScreenContentViewController = FullScreenContentViewController(viewModel: viewModel)
         showFullScreenContent(from: startImageView, to: fullScreenContentViewController!)
     }

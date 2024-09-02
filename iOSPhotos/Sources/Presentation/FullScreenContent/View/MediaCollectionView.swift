@@ -36,7 +36,7 @@ final class MediaCollectionView: UICollectionView, UICollectionViewDataSource, U
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return viewModel.mediaItems.count
+        return viewModel.mediaItemsStore.mediaItems.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -50,7 +50,7 @@ final class MediaCollectionView: UICollectionView, UICollectionViewDataSource, U
             self?.viewModel.adjustAlpha(newAlpha)
         }
         
-        cell.configure(with: viewModel.mediaItems[indexPath.item])
+        cell.configure(with: viewModel.mediaItemsStore.mediaItems[indexPath.item])
         return cell
     }
     
@@ -66,5 +66,10 @@ final class MediaCollectionView: UICollectionView, UICollectionViewDataSource, U
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         (cell as? MediaItemCell)?.startPlayback()
+    }
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        guard let visibleIndexPath = indexPathsForVisibleItems.first else { return }
+        viewModel.didChangeIndex(to: visibleIndexPath.item)
     }
 }

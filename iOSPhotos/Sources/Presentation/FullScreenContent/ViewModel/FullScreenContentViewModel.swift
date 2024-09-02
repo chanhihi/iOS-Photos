@@ -11,16 +11,16 @@ import Photos
 
 final class FullScreenContentViewModel {
     weak var coordinator: FullScreenContentCoordinator?
-    var mediaItems: [MediaItem]
+    let mediaItemsStore: MediaItemsStore
     @Published var currentIndex: Int
     @Published var viewControllerBackgroundColorAlpha: CGFloat = 1
     @Published var highResolutionImage: UIImage?
     private let imageManager = PHCachingImageManager()
     var cancellables: Set<AnyCancellable> = []
     
-    init(coordinator: FullScreenContentCoordinator, mediaItems: [MediaItem], startIndex: Int = 0) {
+    init(coordinator: FullScreenContentCoordinator, mediaItemsStore: MediaItemsStore, startIndex: Int = 0) {
         self.coordinator = coordinator
-        self.mediaItems = mediaItems
+        self.mediaItemsStore = mediaItemsStore
         self.currentIndex = startIndex
         loadHighResolutionImage(for: currentIndex)
     }
@@ -33,44 +33,52 @@ final class FullScreenContentViewModel {
         viewControllerBackgroundColorAlpha = newAlpha
     }
     
-    func showMetaData() {
-        guard currentIndex < mediaItems.count else { return }
-        let item = mediaItems[currentIndex]
+    func getMetaDataInfo() -> String {
+        guard currentIndex < mediaItemsStore.mediaItems.count else { return "No metadata available." }
+        let item = mediaItemsStore.mediaItems[currentIndex]
         let metadataInfo = """
         Date: \(item.creationDate ?? Date())
         Location: \(item.location?.coordinate.latitude ?? 0), \(item.location?.coordinate.longitude ?? 0)
         Resolution: \(item.pixelWidth)x\(item.pixelHeight)
         Type: \(item.mediaType)
         """
-        print(metadataInfo)
+        return metadataInfo
     }
     
     func deleteCurrentItem() {
-        guard !mediaItems.isEmpty else { return }
-        mediaItems.remove(at: currentIndex)
-        
-        if mediaItems.isEmpty {
+        guard !mediaItemsStore.mediaItems.isEmpty else {
             dismissViewController()
-        } else {
-            currentIndex = max(0, currentIndex - 1)
-            loadHighResolutionImage(for: currentIndex)
+            return
         }
+        
+        mediaItemsStore.mediaItems.remove(at: currentIndex)
+        
+        if mediaItemsStore.mediaItems.isEmpty {
+            dismissViewController()
+            return
+        }
+        
+        if currentIndex >= mediaItemsStore.mediaItems.count {
+            currentIndex = mediaItemsStore.mediaItems.count - 1
+        }
+        
+        loadHighResolutionImage(for: currentIndex)
+        dismissViewController()
     }
     
-    func shareContent() {
-        guard mediaItems.indices.contains(currentIndex) else { return }
-        let currentItem = mediaItems[currentIndex]
-        print("Share item \(currentItem)")
+    func likeContent() -> Bool? {
+        guard mediaItemsStore.mediaItems.indices.contains(currentIndex), let asset = mediaItemsStore.mediaItems[currentIndex].asset else { return nil }
+        return MediaItemState.shared.toggleLike(for: asset)
     }
-
-    func likeContent() {
-        guard mediaItems.indices.contains(currentIndex) else { return }
-        print("Liked item at index \(currentIndex)")
+    
+    func isLikedCurrentItem() -> Bool {
+        guard mediaItemsStore.mediaItems.indices.contains(currentIndex), let asset = mediaItemsStore.mediaItems[currentIndex].asset else { return false }
+        return MediaItemState.shared.isLiked(asset: asset)
     }
     
     func loadHighResolutionImage(for index: Int) {
-        guard mediaItems.indices.contains(index) else { return }
-        let item = mediaItems[index]
+        guard mediaItemsStore.mediaItems.indices.contains(index) else { return }
+        let item = mediaItemsStore.mediaItems[index]
         
         guard let asset = item.asset else { return }
         let targetSize = CGSize(width: item.pixelWidth, height: item.pixelHeight)

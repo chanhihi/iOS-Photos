@@ -203,15 +203,22 @@ final class FullScreenContentViewController: UIViewController {
     }
     
     @objc private func deleteCurrentItem() {
-        viewModel.deleteCurrentItem { [weak self] newIndex in
-            guard let self = self, let newIndex = newIndex else { return }
-            
-            self.collectionView?.performBatchUpdates({
-                self.collectionView?.deleteItems(at: [IndexPath(item: self.viewModel.currentIndex, section: 0)])
-            }, completion: { _ in
-                self.collectionView?.scrollToItem(at: IndexPath(item: newIndex, section: 0), at: .centeredHorizontally, animated: true)
-            })
+        let alertController = UIAlertController(title: "사진 삭제", message: "이 사진을 삭제하시겠습니까?", preferredStyle: .alert)
+        
+        let deleteAction = UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+            self?.performDeletion()
         }
+        
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        
+        alertController.addAction(deleteAction)
+        alertController.addAction(cancelAction)
+        
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    func performDeletion() {
+        viewModel.deleteCurrentItem()
     }
     
     @objc private func shareContent() {
