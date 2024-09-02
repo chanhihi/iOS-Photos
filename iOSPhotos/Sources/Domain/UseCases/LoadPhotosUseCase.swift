@@ -15,4 +15,8 @@ final class LoadPhotosUseCase: MediaItemsUseCaseProtocol {
     func execute(completion: @escaping ([MediaItem]) -> Void) {
         repository.loadMediaItems(completion: completion)
     }
+    
+    func executeNextPage(completion: @escaping ([MediaItem]) -> Void) {
+        repository.loadMoreMediaItems(completion: completion)
+    }
 }

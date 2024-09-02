@@ -7,4 +7,5 @@
 
 protocol MediaItemsRepositoryProtocol {
     func loadMediaItems(completion: @escaping ([MediaItem]) -> Void)
+    func loadMoreMediaItems(completion: @escaping ([MediaItem]) -> Void)
 }

@@ -12,6 +12,7 @@ final class StorageCollectionView: UICollectionView, UICollectionViewDelegate, U
     
     var mediaItems: [MediaItem] = []
     private var viewModel: StorageViewModel?
+    private var isLoadingMoreItems = false
     
     init(layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout(), viewModel: StorageViewModel) {
         self.viewModel = viewModel
@@ -45,6 +46,14 @@ final class StorageCollectionView: UICollectionView, UICollectionViewDelegate, U
         self.reloadData()
     }
     
+    func addMediaItems(_ newItems: [MediaItem]) {
+        let startIndex = self.mediaItems.count
+        self.mediaItems.append(contentsOf: newItems)
+        
+        let indexPaths = (startIndex..<self.mediaItems.count).map { IndexPath(item: $0, section: 0) }
+        self.insertItems(at: indexPaths)
+    }
+    
     func updateVisibleCells() {
         for cell in self.visibleCells {
             if let customCell = cell as? CustomCollectionViewCell, let indexPath = self.indexPath(for: customCell) {
@@ -54,6 +63,7 @@ final class StorageCollectionView: UICollectionView, UICollectionViewDelegate, U
         }
     }
     
+    // MARK: - UICollectionViewDataSource Methods
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return mediaItems.count
     }
@@ -94,12 +104,34 @@ final class StorageCollectionView: UICollectionView, UICollectionViewDelegate, U
 
 // MARK: - UICollectionViewDelegateFlowLayout Methods
 extension StorageCollectionView: UICollectionViewDelegateFlowLayout {
-    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
         return .collectionViewMinimumInterSpacing
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return .collectionViewMinimumLineSpacing
+    }
+}
+
+// MARK: - UIScrollViewDelegate Methods
+extension StorageCollectionView: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard !isLoadingMoreItems else { return }
+        
+        let threshold: CGFloat = 100.0
+        let contentOffsetY = scrollView.contentOffset.y
+        let maximumOffsetY = scrollView.contentSize.height - scrollView.frame.size.height
+        
+        if maximumOffsetY - contentOffsetY <= threshold {
+            isLoadingMoreItems = true
+            loadMoreItems()
+        }
+    }
+    
+    private func loadMoreItems() {
+        viewModel?.loadMoreMediaItems() { [weak self] in
+            guard let self = self else { return }
+            self.isLoadingMoreItems = false
+        }
     }
 }

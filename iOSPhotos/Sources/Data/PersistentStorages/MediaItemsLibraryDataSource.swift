@@ -24,7 +24,7 @@ final class MediaItemsLibraryDataSource {
                 DispatchQueue.main.async {
                     completion(newStatus == .authorized)
                 }
-            } 
+            }
         default:
             completion(false)
         }

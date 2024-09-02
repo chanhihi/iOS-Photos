@@ -9,4 +9,5 @@ import UIKit
 
 protocol MediaItemsUseCaseProtocol {
     func execute(completion: @escaping ([MediaItem]) -> Void)
+    func executeNextPage(completion: @escaping ([MediaItem]) -> Void)
 }
