@@ -58,10 +58,7 @@ final class StorageCollectionView: UICollectionView, UICollectionViewDelegate, U
         for cell in self.visibleCells {
             if let customCell = cell as? CustomCollectionViewCell, let indexPath = self.indexPath(for: customCell) {
                 let mediaItem = mediaItems[indexPath.row]
-                let segmentedIndex = AppStateManager.shared.loadLastStorageSegmentedIndex()
-                if (SegmentedModel.SortType.all.rawValue != segmentedIndex) {
                 configureCell(customCell, with: mediaItem, isHighResolution: true)
-                }
             }
         }
     }
@@ -83,13 +80,15 @@ final class StorageCollectionView: UICollectionView, UICollectionViewDelegate, U
     private func configureCell(_ cell: CustomCollectionViewCell, with mediaItem: MediaItem, isHighResolution: Bool) {
         cell.configure(with: mediaItem, segmentIndex: SegmentedModel.SortType(rawValue: (viewModel?.selectedSegmentIndex)!) ?? SegmentedModel.SortType.all)
         
-        cell.configure(with: mediaItem, isHighResolution: isHighResolution)
-
         let segmentedIndex = AppStateManager.shared.loadLastStorageSegmentedIndex()
         if (SegmentedModel.SortType.year.rawValue == segmentedIndex || SegmentedModel.SortType.month.rawValue == segmentedIndex) {
             cell.layer.cornerRadius = .collectionViewCornerRadiusYearMonth
             cell.clipsToBounds = true
+        } else if (SegmentedModel.SortType.day.rawValue == segmentedIndex || SegmentedModel.SortType.all.rawValue == segmentedIndex) {
+            cell.layer.cornerRadius = .collectionViewCornerRadiusDayAll
         }
+        
+        cell.configure(with: mediaItem, isHighResolution: isHighResolution)
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {

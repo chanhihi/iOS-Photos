@@ -24,12 +24,6 @@ final class CustomCollectionViewCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        layer.cornerRadius = 0
-        clipsToBounds = false
-    }
-    
     private func setupImageView() {
         addSubview(imageView)
         imageView.contentMode = .scaleAspectFill

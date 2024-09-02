@@ -74,7 +74,7 @@ final class FullScreenContentViewController: UIViewController {
         toolbar = UIToolbar(frame: .init(x: 0, y: 0, width: SizeManager.shared.screenWidth, height: 49))
         
         let shareButton = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(shareContent))
-        let likeButton = UIBarButtonItem(image: UIImage(systemName: "heart"), style: .plain, target: self, action: #selector(likeContent))
+        let likeButton = UIBarButtonItem(image: UIImage(systemName: viewModel.isLikedCurrentItem() ? "heart.fill" : "heart"), style: .plain, target: self, action: #selector(likeContent))
         let metaDataButton = UIBarButtonItem(image: UIImage(systemName: "info.circle"), style: .plain, target: self, action: #selector(showImageMetaData))
         let deleteButton = UIBarButtonItem(barButtonSystemItem: .trash, target: self, action: #selector(deleteCurrentItem))
         
@@ -134,12 +134,19 @@ final class FullScreenContentViewController: UIViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] index in
                 self?.updateNavigationBarTitle(at: index)
+                self?.updateCurrentItemLikeButton()
             }
             .store(in: &viewModel.cancellables)
     }
     
     private func updateNavigationBarTitle(at index: Int) {
-        let item = viewModel.mediaItems[index]
+        guard !viewModel.mediaItemsStore.mediaItems.isEmpty, index >= 0, index < viewModel.mediaItemsStore.mediaItems.count else {
+            navigationItem.title = "No Media Available"
+            navigationItem.titleView = nil
+            return
+        }
+        
+        let item = viewModel.mediaItemsStore.mediaItems[index]
         navigationItem.title = formatDate(item.creationDate)
         
         if let creationDate = item.creationDate {
@@ -188,15 +195,27 @@ final class FullScreenContentViewController: UIViewController {
     }
     
     @objc private func showImageMetaData() {
-        viewModel.showMetaData()
+        let metadataInfo = viewModel.getMetaDataInfo()
+        let metadataVC = MetadataViewController(metadataInfo: metadataInfo)
+        metadataVC.modalPresentationStyle = .custom
+        metadataVC.transitioningDelegate = self
+        present(metadataVC, animated: true, completion: nil)
     }
     
     @objc private func deleteCurrentItem() {
-        viewModel.deleteCurrentItem()
+        viewModel.deleteCurrentItem { [weak self] newIndex in
+            guard let self = self, let newIndex = newIndex else { return }
+            
+            self.collectionView?.performBatchUpdates({
+                self.collectionView?.deleteItems(at: [IndexPath(item: self.viewModel.currentIndex, section: 0)])
+            }, completion: { _ in
+                self.collectionView?.scrollToItem(at: IndexPath(item: newIndex, section: 0), at: .centeredHorizontally, animated: true)
+            })
+        }
     }
     
     @objc private func shareContent() {
-        let item = viewModel.mediaItems[viewModel.currentIndex]
+        let item = viewModel.mediaItemsStore.mediaItems[viewModel.currentIndex]
         let itemsToShare: [Any] = [item.image as Any]
         let activityViewController = UIActivityViewController(activityItems: itemsToShare, applicationActivities: nil)
         activityViewController.popoverPresentationController?.sourceView = self.view
@@ -204,7 +223,27 @@ final class FullScreenContentViewController: UIViewController {
     }
     
     @objc private func likeContent() {
-        viewModel.likeContent()
+        if let isLiked = viewModel.likeContent() {
+            updateLikeButtonImage(isLiked: isLiked)
+        }
     }
     
+    private func updateLikeButtonImage(isLiked: Bool) {
+        let imageName = isLiked ? "heart.fill" : "heart"
+        let likeButton = UIBarButtonItem(image: UIImage(systemName: imageName), style: .plain, target: self, action: #selector(likeContent))
+        toolbar.items?[2] = likeButton
+    }
+    
+    private func updateCurrentItemLikeButton() {
+        let imageName = viewModel.isLikedCurrentItem() ? "heart.fill" : "heart"
+        let likeButton = UIBarButtonItem(image: UIImage(systemName: imageName), style: .plain, target: self, action: #selector(likeContent))
+        toolbar.items?[2] = likeButton
+    }
+    
+}
+
+extension FullScreenContentViewController: UIViewControllerTransitioningDelegate {
+    func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
+        return oneThirdSizePresentationController(presentedViewController: presented, presenting: presenting)
+    }
 }

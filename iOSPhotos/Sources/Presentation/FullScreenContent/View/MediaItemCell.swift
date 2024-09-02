@@ -117,7 +117,7 @@ final class MediaItemCell: UICollectionViewCell {
             }
         }
     }
-
+    
     private func loadLowResolutionImage(for mediaItem: MediaItem) {
         guard let asset = mediaItem.asset else { return }
         
@@ -135,7 +135,6 @@ final class MediaItemCell: UICollectionViewCell {
             }
         }
     }
-
     
     private func prepareForVideoDisplay(_ videoURL: URL?) {
         guard let videoURL = videoURL else { return }

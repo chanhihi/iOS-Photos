@@ -7,11 +7,9 @@
 //
 
 final class MediaItemsRepository: MediaItemsRepositoryProtocol {
-    private let mediaItemsLibraryDataSource: MediaItemsLibraryDataSource
     private let mediaLoader: MediaLoader
     
-    init(mediaItemsLibraryDataSource: MediaItemsLibraryDataSource, mediaLoader: MediaLoader) {
-        self.mediaItemsLibraryDataSource = mediaItemsLibraryDataSource
+    init(mediaLoader: MediaLoader) {
         self.mediaLoader = mediaLoader
     }
     
@@ -40,7 +38,7 @@ final class MediaItemsRepository: MediaItemsRepositoryProtocol {
             guard let date1 = item1.creationDate, let date2 = item2.creationDate else {
                 return false
             }
-            return date1 > date2
+            return date1 < date2
         }
     }
 }
