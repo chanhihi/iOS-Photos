@@ -9,6 +9,7 @@ import UIKit
 import Photos
 
 struct MediaItem: Equatable {
+    let asset: PHAsset?
     let image: UIImage?
     let videoURL: URL?
     let creationDate: Date?

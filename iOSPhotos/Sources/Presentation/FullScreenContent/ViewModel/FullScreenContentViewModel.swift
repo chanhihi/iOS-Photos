@@ -7,20 +7,22 @@
 
 import UIKit
 import Combine
-
-//import AVKit
+import Photos
 
 final class FullScreenContentViewModel {
     weak var coordinator: FullScreenContentCoordinator?
     var mediaItems: [MediaItem]
     @Published var currentIndex: Int
     @Published var viewControllerBackgroundColorAlpha: CGFloat = 1
+    @Published var highResolutionImage: UIImage?  // 고해상도 이미지 저장 프로퍼티
+    private let imageManager = PHCachingImageManager()  // 이미지 로더
     var cancellables: Set<AnyCancellable> = []
     
     init(coordinator: FullScreenContentCoordinator, mediaItems: [MediaItem], startIndex: Int = 0) {
         self.coordinator = coordinator
         self.mediaItems = mediaItems
         self.currentIndex = startIndex
+        loadHighResolutionImage(for: currentIndex)  // 초기 로딩 시 고해상도 이미지 로드
     }
     
     func dismissViewController() {
@@ -40,34 +42,52 @@ final class FullScreenContentViewModel {
         Resolution: \(item.pixelWidth)x\(item.pixelHeight)
         Type: \(item.mediaType)
         """
-        // ViewModel should not directly handle UI, so it returns info for viewController to display
-        print(metadataInfo)  // Replace print statement with a delegate or callback to handle in viewController
+        print(metadataInfo)
     }
-
     
     func deleteCurrentItem() {
         guard !mediaItems.isEmpty else { return }
         mediaItems.remove(at: currentIndex)
-
+        
         if mediaItems.isEmpty {
-            // dismiss
+            dismissViewController()
         } else {
             currentIndex = max(0, currentIndex - 1)
+            loadHighResolutionImage(for: currentIndex)
         }
     }
     
     func shareContent() {
         guard mediaItems.indices.contains(currentIndex) else { return }
         let currentItem = mediaItems[currentIndex]
-        // 공유 로직 구현, 예: UIActivityViewController 사용
-        // 주의: 뷰 모델에서 직접 UI를 호출하지 않도록 설계하는 것이 좋음 (Coordinator나 ViewController를 통해 처리)
         print("Share item \(currentItem)")
     }
 
     func likeContent() {
         guard mediaItems.indices.contains(currentIndex) else { return }
-        // 좋아요 토글 기능 구현
-        // 예: 데이터베이스나 로컬 저장소에 좋아요 상태 업데이트
         print("Liked item at index \(currentIndex)")
+    }
+    
+    func loadHighResolutionImage(for index: Int) {
+        guard mediaItems.indices.contains(index) else { return }
+        let item = mediaItems[index]
+        
+        guard let asset = item.asset else { return }
+        let targetSize = CGSize(width: item.pixelWidth, height: item.pixelHeight)
+        let options = PHImageRequestOptions()
+        options.deliveryMode = .highQualityFormat
+        options.isSynchronous = false
+        
+        imageManager.requestImage(for: asset, targetSize: targetSize, contentMode: .aspectFit, options: options) { [weak self] (image, _) in
+            DispatchQueue.main.async {
+                self?.highResolutionImage = image
+            }
+        }
+    }
+    
+    func didChangeIndex(to newIndex: Int) {
+        guard newIndex != currentIndex else { return }
+        currentIndex = newIndex
+        loadHighResolutionImage(for: currentIndex)
     }
 }

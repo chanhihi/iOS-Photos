@@ -7,11 +7,14 @@
 
 import UIKit
 import AVKit
+import Photos
 
 final class MediaItemCell: UICollectionViewCell {
     static let reuseIdentifier = "MediaItemCell"
     private let scrollView = UIScrollView()
     let imageView = UIImageView()
+    private let imageManager = PHCachingImageManager()
+    private var imageRequestID: PHImageRequestID?
     private var videoContainerView = UIView()
     private var playerLayer: AVPlayerLayer?
     private var player: AVPlayer?
@@ -36,6 +39,12 @@ final class MediaItemCell: UICollectionViewCell {
         playerLayer?.removeFromSuperlayer()
         playerLayer = nil
         player = nil
+        
+        if let requestID = imageRequestID {
+            imageManager.cancelImageRequest(requestID)
+            imageRequestID = nil
+        }
+        imageView.image = nil
     }
     
     private func setupUI() {
@@ -63,7 +72,7 @@ final class MediaItemCell: UICollectionViewCell {
         switch mediaItem.mediaType {
         case .image:
             prepareForImageDisplay()
-            imageView.image = mediaItem.image
+            loadHighResolutionImage(for: mediaItem)
         case .video:
             prepareForVideoDisplay(mediaItem.videoURL)
         default:
@@ -78,6 +87,55 @@ final class MediaItemCell: UICollectionViewCell {
         imageView.isHidden = false
         scrollView.isHidden = false
     }
+    
+    private func loadHighResolutionImage(for mediaItem: MediaItem) {
+        guard let asset = mediaItem.asset else { return }
+        if let requestID = imageRequestID {
+            imageManager.cancelImageRequest(requestID)
+        }
+        
+        let targetSize = CGSize(width: mediaItem.pixelWidth, height: mediaItem.pixelHeight)
+        let options = PHImageRequestOptions()
+        options.deliveryMode = .highQualityFormat
+        options.isNetworkAccessAllowed = true
+        options.resizeMode = .exact
+        options.isSynchronous = false
+        
+        imageRequestID = imageManager.requestImage(for: asset, targetSize: targetSize, contentMode: .aspectFit, options: options) { [weak self] (image, info) in
+            guard let self = self else { return }
+            
+            if let error = info?[PHImageErrorKey] as? Error {
+                print("Error loading high-resolution image: \(error.localizedDescription)")
+                self.loadLowResolutionImage(for: mediaItem)
+            } else if let isDegraded = info?[PHImageResultIsDegradedKey] as? Bool, !isDegraded, let image = image {
+                DispatchQueue.main.async {
+                    self.imageView.image = image
+                }
+            } else {
+                print("Failed to load high-resolution image for asset: \(asset.localIdentifier)")
+                self.loadLowResolutionImage(for: mediaItem)
+            }
+        }
+    }
+
+    private func loadLowResolutionImage(for mediaItem: MediaItem) {
+        guard let asset = mediaItem.asset else { return }
+        
+        let targetSize = CGSize(width: 150, height: 150)
+        let options = PHImageRequestOptions()
+        options.deliveryMode = .fastFormat
+        options.isSynchronous = false
+        
+        imageRequestID = imageManager.requestImage(for: asset, targetSize: targetSize, contentMode: .aspectFit, options: options) { [weak self] (image, info) in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                if let image = image {
+                    self.imageView.image = image
+                }
+            }
+        }
+    }
+
     
     private func prepareForVideoDisplay(_ videoURL: URL?) {
         guard let videoURL = videoURL else { return }

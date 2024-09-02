@@ -54,9 +54,9 @@ extension ForYouTableView: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch section {
         case 0:
-            return "Photos"
+            return "Loaded Photos"
         case 1:
-            return "Videos"
+            return "Loaded Videos"
         default:
             return nil
         }

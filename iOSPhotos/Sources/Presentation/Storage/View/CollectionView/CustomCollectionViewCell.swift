@@ -6,17 +6,20 @@
 //
 
 import UIKit
+import Photos
 
 final class CustomCollectionViewCell: UICollectionViewCell {
     let imageView = UIImageView()
     private var durationLabel: UILabel?
     private var dateLabel: UILabel?
+    private var imageRequestID: PHImageRequestID?
+    private let imageManager = PHCachingImageManager()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupImageView()
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -34,7 +37,7 @@ final class CustomCollectionViewCell: UICollectionViewCell {
             imageView.trailingAnchor.constraint(equalTo: trailingAnchor)
         ])
     }
-
+    
     private func setupDurationLabel() {
         guard durationLabel == nil else { return }
         
@@ -84,7 +87,7 @@ final class CustomCollectionViewCell: UICollectionViewCell {
         let seconds = Int(duration) % 60
         return String(format: "%d:%02d", minutes, seconds)
     }
-
+    
     private func formatDate(_ date: Date, for segmentIndex: SegmentedModel.SortType) -> String {
         let formatter = DateFormatter()
         switch segmentIndex {
@@ -121,6 +124,32 @@ final class CustomCollectionViewCell: UICollectionViewCell {
         } else {
             dateLabel?.removeFromSuperview()
             dateLabel = nil
+        }
+    }
+    
+    func configure(with mediaItem: MediaItem, isHighResolution: Bool) {
+        cancelImageRequest()
+        guard let asset = mediaItem.asset else { return }
+        let targetSize = isHighResolution ? CGSize(width: mediaItem.pixelWidth, height: mediaItem.pixelHeight) : CGSize(width: 150, height: 150)
+        let options = PHImageRequestOptions()
+        options.deliveryMode = isHighResolution ? .highQualityFormat : .fastFormat
+        options.resizeMode = isHighResolution ? .exact : .none
+        options.isNetworkAccessAllowed = true
+        options.isSynchronous = false
+        
+        imageRequestID = imageManager.requestImage(for: asset, targetSize: targetSize, contentMode: .aspectFill, options: options) { [weak self] (image, _) in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                if let image = image {
+                    self.imageView.image = image
+                }
+            }
+        }
+    }
+    
+    func cancelImageRequest() {
+        if let requestID = imageRequestID {
+            imageManager.cancelImageRequest(requestID)
         }
     }
 }

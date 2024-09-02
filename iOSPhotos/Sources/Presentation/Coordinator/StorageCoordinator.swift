@@ -29,7 +29,7 @@ final class StorageCoordinator: StorageCoordinatorProtocol {
         let mediaLoader = MediaLoader()
         
         let repository = MediaItemsRepository(mediaItemsLibraryDataSource: mediaItemsLibraryDataSource, mediaLoader: mediaLoader)
-
+        
         let useCase = LoadPhotosUseCase(repository: repository)
         return StorageViewModel(coordinator: self, loadMediaItemsUseCase: useCase)
     }

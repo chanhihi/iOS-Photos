@@ -144,7 +144,7 @@ final class FullScreenContentViewController: UIViewController {
         
         if let creationDate = item.creationDate {
             let dateOnlyFormatter = DateFormatter()
-            dateOnlyFormatter.dateFormat = "yyyy년 MM월 dd일" // 날짜 형식
+            dateOnlyFormatter.dateFormat = "yyyy년 MM월 dd일"
             let dateOnlyString = dateOnlyFormatter.string(from: creationDate)
             
             let timeOnlyFormatter = DateFormatter()
@@ -199,7 +199,7 @@ final class FullScreenContentViewController: UIViewController {
         let item = viewModel.mediaItems[viewModel.currentIndex]
         let itemsToShare: [Any] = [item.image as Any]
         let activityViewController = UIActivityViewController(activityItems: itemsToShare, applicationActivities: nil)
-        activityViewController.popoverPresentationController?.sourceView = self.view  // For iPads
+        activityViewController.popoverPresentationController?.sourceView = self.view
         self.present(activityViewController, animated: true, completion: nil)
     }
     

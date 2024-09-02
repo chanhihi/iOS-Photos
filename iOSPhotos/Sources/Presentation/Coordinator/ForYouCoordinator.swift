@@ -18,7 +18,7 @@ final class ForYouCoordinator: ForYouCoordinatorProtocol {
         self.navigationController = navigationController
         self.forYouViewController = ForYouViewController()
     }
-
+    
     func start() {
         self.forYouViewController.viewModel = createForYouViewModel()
         navigationController.viewControllers = [forYouViewController]

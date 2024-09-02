@@ -17,7 +17,7 @@ final class MediaLoader {
         let status = PHPhotoLibrary.authorizationStatus()
         
         switch status {
-        case .authorized:
+        case .authorized, .limited:
             completion(true)
         case .denied, .restricted:
             completion(false)
@@ -88,15 +88,13 @@ final class MediaLoader {
         let imageSize = CGSize(width: 150, height: 150)
         let options = PHImageRequestOptions()
         options.deliveryMode = .fastFormat
-        //        let imageSize = CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
-        //        let options = PHImageRequestOptions()
-        //        options.deliveryMode = .highQualityFormat
         options.isSynchronous = false
         
         if asset.mediaType == .image {
             imageManager.requestImage(for: asset, targetSize: imageSize, contentMode: .aspectFill, options: options) { (image, _) in
                 if let image = image {
                     let photo = MediaItem(
+                        asset: asset,
                         image: image,
                         videoURL: nil,
                         creationDate: asset.creationDate,
@@ -125,6 +123,7 @@ final class MediaLoader {
                         let fileSize = self.getFileSize(url: urlAsset.url)
                         
                         let video = MediaItem(
+                            asset: asset,
                             image: image,
                             videoURL: urlAsset.url,
                             creationDate: asset.creationDate,

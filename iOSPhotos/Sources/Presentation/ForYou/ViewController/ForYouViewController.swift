@@ -53,6 +53,8 @@ class ForYouViewController: UIViewController {
     
     private func updateLibraryButton() {
         libraryButton.setTitle("모든 사진을 볼 수 있게 되어있어요.", for: .normal)
+        
+        print(viewModel.mediaItems)
     }
     
     private func setupBindings() {
@@ -89,6 +91,7 @@ class ForYouViewController: UIViewController {
                     self.updateLibraryButton()
                 case .limited:
                     PHPhotoLibrary.shared().presentLimitedLibraryPicker(from: self)
+                    self.viewModel.loadMediaItems()
                 case .denied, .restricted:
                     self.showPermissionDeniedAlert()
                 case .notDetermined:

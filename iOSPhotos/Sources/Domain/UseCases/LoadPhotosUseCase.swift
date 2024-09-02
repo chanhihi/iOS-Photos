@@ -20,3 +20,4 @@ final class LoadPhotosUseCase: MediaItemsUseCaseProtocol {
         repository.loadMoreMediaItems(completion: completion)
     }
 }
+

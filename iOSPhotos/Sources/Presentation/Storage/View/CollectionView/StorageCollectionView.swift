@@ -58,7 +58,10 @@ final class StorageCollectionView: UICollectionView, UICollectionViewDelegate, U
         for cell in self.visibleCells {
             if let customCell = cell as? CustomCollectionViewCell, let indexPath = self.indexPath(for: customCell) {
                 let mediaItem = mediaItems[indexPath.row]
-                configureCell(customCell, with: mediaItem)
+                let segmentedIndex = AppStateManager.shared.loadLastStorageSegmentedIndex()
+                if (SegmentedModel.SortType.all.rawValue != segmentedIndex) {
+                configureCell(customCell, with: mediaItem, isHighResolution: true)
+                }
             }
         }
     }
@@ -72,13 +75,16 @@ final class StorageCollectionView: UICollectionView, UICollectionViewDelegate, U
         let mediaItem = mediaItems[indexPath.row]
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! CustomCollectionViewCell
         
-        configureCell(cell, with: mediaItem)
+        configureCell(cell, with: mediaItem, isHighResolution: false)
         
         return cell
     }
     
-    private func configureCell(_ cell: CustomCollectionViewCell, with mediaItem: MediaItem) {
+    private func configureCell(_ cell: CustomCollectionViewCell, with mediaItem: MediaItem, isHighResolution: Bool) {
         cell.configure(with: mediaItem, segmentIndex: SegmentedModel.SortType(rawValue: (viewModel?.selectedSegmentIndex)!) ?? SegmentedModel.SortType.all)
+        
+        cell.configure(with: mediaItem, isHighResolution: isHighResolution)
+
         let segmentedIndex = AppStateManager.shared.loadLastStorageSegmentedIndex()
         if (SegmentedModel.SortType.year.rawValue == segmentedIndex || SegmentedModel.SortType.month.rawValue == segmentedIndex) {
             cell.layer.cornerRadius = .collectionViewCornerRadiusYearMonth
@@ -99,6 +105,24 @@ final class StorageCollectionView: UICollectionView, UICollectionViewDelegate, U
         } else {
             self.viewModel?.updateSegmentIndex(to: segmentedIndex + 1)
         }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        guard let customCell = cell as? CustomCollectionViewCell else { return }
+        let mediaItem = mediaItems[indexPath.row]
+        let segmentedIndex = AppStateManager.shared.loadLastStorageSegmentedIndex()
+        configureCell(customCell, with: mediaItem, isHighResolution: SegmentedModel.SortType.all.rawValue != segmentedIndex ? true : false)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        guard let customCell = cell as? CustomCollectionViewCell else { return }
+        
+        guard indexPath.row < mediaItems.count else {
+            print("Invalid index path: \(indexPath.row) for mediaItems count: \(mediaItems.count)")
+            return
+        }
+        
+        customCell.cancelImageRequest()
     }
 }
 

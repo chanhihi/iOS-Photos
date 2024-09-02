@@ -43,7 +43,7 @@ final class StorageViewModel: NSObject {
                     guard let date1 = item1.creationDate, let date2 = item2.creationDate else {
                         return false
                     }
-                    return date1 < date2
+                    return date1 > date2
                 }
             }
         }
@@ -57,7 +57,7 @@ final class StorageViewModel: NSObject {
                     guard let date1 = item1.creationDate, let date2 = item2.creationDate else {
                         return false
                     }
-                    return date1 < date2
+                    return date1 > date2
                 }
                 self.mediaItems.append(contentsOf: sortedNewItems)
                 
