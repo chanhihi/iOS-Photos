@@ -8,7 +8,7 @@
 import UIKit
 
 final class MetadataViewController: UIViewController {
-
+    
     private let metadataLabel = UILabel()
     
     init(metadataInfo: String) {

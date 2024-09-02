@@ -63,7 +63,6 @@ final class StorageCollectionView: UICollectionView, UICollectionViewDelegate, U
         }
     }
     
-    // MARK: - UICollectionViewDataSource Methods
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return mediaItems.count
     }
@@ -123,7 +122,6 @@ final class StorageCollectionView: UICollectionView, UICollectionViewDelegate, U
     }
 }
 
-// MARK: - UICollectionViewDelegateFlowLayout Methods
 extension StorageCollectionView: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
         return .collectionViewMinimumInterSpacing
@@ -134,7 +132,6 @@ extension StorageCollectionView: UICollectionViewDelegateFlowLayout {
     }
 }
 
-// MARK: - UIScrollViewDelegate Methods
 extension StorageCollectionView: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard !isLoadingMoreItems else { return }

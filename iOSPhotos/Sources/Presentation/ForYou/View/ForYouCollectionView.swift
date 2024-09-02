@@ -8,9 +8,9 @@
 import UIKit
 
 class ForYouCollectionView: UICollectionView, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-
+    
     private var mediaItems: [MediaItem] = []
-
+    
     override init(frame: CGRect, collectionViewLayout layout: UICollectionViewLayout) {
         super.init(frame: frame, collectionViewLayout: layout)
         setupCollectionView()
@@ -33,8 +33,6 @@ class ForYouCollectionView: UICollectionView, UICollectionViewDataSource, UIColl
         reloadData()
     }
     
-    // MARK: - UICollectionViewDataSource
-    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return mediaItems.count
     }
@@ -45,8 +43,6 @@ class ForYouCollectionView: UICollectionView, UICollectionViewDataSource, UIColl
         cell.configure(with: mediaItem)
         return cell
     }
-    
-    // MARK: - UICollectionViewDelegateFlowLayout
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: 100, height: 100)

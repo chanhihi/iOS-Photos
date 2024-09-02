@@ -25,7 +25,7 @@ class ForYouViewController: UIViewController {
     
     private func setupUI() {
         view.backgroundColor = .systemBackground
-
+        
         importLibraryTableView = ForYouTableView(viewModel: viewModel)
         
         libraryButton = UIButton(type: .system)

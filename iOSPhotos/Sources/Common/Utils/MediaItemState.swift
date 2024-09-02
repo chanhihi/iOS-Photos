@@ -11,9 +11,9 @@ import Photos
 final class MediaItemState {
     static let shared = MediaItemState()
     private(set) var likes: [String: Bool] = [:]
-
+    
     private init() {}
-
+    
     func toggleLike(for asset: PHAsset) -> Bool {
         let identifier = asset.localIdentifier
         if let isLiked = likes[identifier] {

@@ -22,11 +22,11 @@ final class StorageViewController: UIViewController {
         setupLayout()
         setupLayerBinding()
         setupPhotosBinding()
-        segmentIndexBinding() // segmentIndexBinding을 viewDidLoad에 추가합니다.
+        segmentIndexBinding()
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated) // super를 호출해줍니다.
+        super.viewWillAppear(animated)
         navigationController?.isNavigationBarHidden = true
     }
     
@@ -45,7 +45,6 @@ final class StorageViewController: UIViewController {
     }
     
     private func setupPhotosBinding() {
-        // MediaItemsStore의 데이터를 Binding합니다.
         viewModel.mediaItemsStore.$mediaItems
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] mediaItems in
@@ -55,7 +54,6 @@ final class StorageViewController: UIViewController {
     }
     
     private func setupLayerBinding() {
-        // 레이아웃 변경 시 컬렉션 뷰를 업데이트합니다.
         viewModel.$currentLayout
             .receive(on: DispatchQueue.main)
             .sink { [weak self] layout in
@@ -66,7 +64,6 @@ final class StorageViewController: UIViewController {
     }
     
     private func segmentIndexBinding() {
-        // Segment Index가 변경될 때, SegmentControl을 업데이트합니다.
         viewModel.$selectedSegmentIndex
             .receive(on: DispatchQueue.main)
             .sink { [weak self] index in
