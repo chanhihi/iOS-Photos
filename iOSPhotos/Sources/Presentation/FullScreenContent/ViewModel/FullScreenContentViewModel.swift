@@ -14,15 +14,15 @@ final class FullScreenContentViewModel {
     var mediaItems: [MediaItem]
     @Published var currentIndex: Int
     @Published var viewControllerBackgroundColorAlpha: CGFloat = 1
-    @Published var highResolutionImage: UIImage?  // 고해상도 이미지 저장 프로퍼티
-    private let imageManager = PHCachingImageManager()  // 이미지 로더
+    @Published var highResolutionImage: UIImage?
+    private let imageManager = PHCachingImageManager()
     var cancellables: Set<AnyCancellable> = []
     
     init(coordinator: FullScreenContentCoordinator, mediaItems: [MediaItem], startIndex: Int = 0) {
         self.coordinator = coordinator
         self.mediaItems = mediaItems
         self.currentIndex = startIndex
-        loadHighResolutionImage(for: currentIndex)  // 초기 로딩 시 고해상도 이미지 로드
+        loadHighResolutionImage(for: currentIndex)
     }
     
     func dismissViewController() {

@@ -39,28 +39,15 @@ final class StorageViewModel: NSObject {
     func loadMediaItems() {
         loadMediaItemsUseCase.execute { [weak self] loadedMediaItems in
             DispatchQueue.main.async {
-                self?.mediaItems = loadedMediaItems.sorted { (item1, item2) -> Bool in
-                    guard let date1 = item1.creationDate, let date2 = item2.creationDate else {
-                        return false
-                    }
-                    return date1 > date2
-                }
+                self?.mediaItems = loadedMediaItems
             }
         }
     }
-    
+
     func loadMoreMediaItems(completion: @escaping () -> Void) {
         loadMediaItemsUseCase.executeNextPage { [weak self] newMediaItems in
             DispatchQueue.main.async {
-                guard let self = self else { return }
-                let sortedNewItems = newMediaItems.sorted { (item1, item2) -> Bool in
-                    guard let date1 = item1.creationDate, let date2 = item2.creationDate else {
-                        return false
-                    }
-                    return date1 > date2
-                }
-                self.mediaItems.append(contentsOf: sortedNewItems)
-                
+                self?.mediaItems.append(contentsOf: newMediaItems)
                 completion()
             }
         }

@@ -9,6 +9,6 @@ struct SegmentedModel {
     let items = ["연", "월", "일", "모든 사진"]
     
     enum SortType: Int {
-        case year = 0, month, day, all
+        case year = 0, month = 1, day = 2, all = 3
     }
 }

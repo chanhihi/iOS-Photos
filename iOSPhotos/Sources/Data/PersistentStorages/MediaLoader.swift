@@ -10,7 +10,7 @@ import Photos
 final class MediaLoader {
     private let imageManager = PHCachingImageManager()
     private var allAssets: PHFetchResult<PHAsset>?
-    private var currentPage: Int = 0
+    var currentPage: Int = 0
     private let itemsPerPage: Int = 60
     
     func checkAndRequestPhotoLibraryPermission(completion: @escaping (Bool) -> Void) {
@@ -79,7 +79,6 @@ final class MediaLoader {
         }
         
         group.notify(queue: .main) {
-            self.currentPage += 1
             completion(fetchedMediaItems)
         }
     }
@@ -87,7 +86,7 @@ final class MediaLoader {
     private func loadMediaItem(for asset: PHAsset, completion: @escaping (MediaItem?) -> Void) {
         let imageSize = CGSize(width: 150, height: 150)
         let options = PHImageRequestOptions()
-        options.deliveryMode = .fastFormat
+        options.deliveryMode = .highQualityFormat
         options.isSynchronous = false
         
         if asset.mediaType == .image {

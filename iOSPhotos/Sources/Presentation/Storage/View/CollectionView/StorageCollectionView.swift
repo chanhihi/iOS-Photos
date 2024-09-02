@@ -89,8 +89,6 @@ final class StorageCollectionView: UICollectionView, UICollectionViewDelegate, U
         if (SegmentedModel.SortType.year.rawValue == segmentedIndex || SegmentedModel.SortType.month.rawValue == segmentedIndex) {
             cell.layer.cornerRadius = .collectionViewCornerRadiusYearMonth
             cell.clipsToBounds = true
-        } else {
-            cell.layer.cornerRadius = .collectionViewCornerRadiusDayAll
         }
     }
     

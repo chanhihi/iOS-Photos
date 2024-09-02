@@ -16,19 +16,31 @@ final class MediaItemsRepository: MediaItemsRepositoryProtocol {
     }
     
     func loadMediaItems(completion: @escaping ([MediaItem]) -> Void) {
-//        초기 전체를 통으로 불러오던 메소드
-//        mediaItemsLibraryDataSource.loadContents { mediaItems in
-//            completion(mediaItems)
-//        }
-        
-        mediaLoader.loadContents(completion: { mediaItems in
-            completion(mediaItems)
-        })
+        mediaLoader.currentPage = 0
+        mediaLoader.loadContents { [weak self] mediaItems in
+            guard let self = self else { return }
+            
+            let sortedItems = self.sortMediaItemsByDate(mediaItems)
+            completion(sortedItems)
+        }
     }
     
     func loadMoreMediaItems(completion: @escaping ([MediaItem]) -> Void) {
-        mediaLoader.loadContents(completion: { mediaItems in
-            completion(mediaItems)
-        })
+        mediaLoader.currentPage += 1
+        mediaLoader.loadPage { [weak self] mediaItems in
+            guard let self = self else { return }
+            
+            let sortedItems = self.sortMediaItemsByDate(mediaItems)
+            completion(sortedItems)
+        }
+    }
+    
+    private func sortMediaItemsByDate(_ mediaItems: [MediaItem]) -> [MediaItem] {
+        return mediaItems.sorted { (item1, item2) -> Bool in
+            guard let date1 = item1.creationDate, let date2 = item2.creationDate else {
+                return false
+            }
+            return date1 > date2
+        }
     }
 }
